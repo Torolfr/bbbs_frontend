@@ -1,0 +1,107 @@
+@import './styles/utils.scss';
+
+.card-question {
+  padding: 50px 50px 47px;
+  position: relative;
+  width: 100%;
+  transition: all 0.5s linear;
+
+  &__rubric {
+    align-self: flex-start;
+    background-color: $background;
+  }
+
+  &__title-wrap {
+    display: block;
+    text-decoration: none;
+  }
+
+  &__title {
+    width: fit-content;
+    max-width: 770px;
+    margin: 0 0 15px;
+    transition: .3s ease;
+
+    &:hover {
+      cursor: pointer;
+      color: $blue;
+    }
+  }
+
+  &__tags {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+  }
+
+  &__tag {
+    height: 19px;
+    display: inline-block;
+  }
+
+  &__wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  &__answer {
+    height: 0;
+    min-height: 0;
+    opacity: 0;
+    transition: min-height, 0.3s ease-out;
+  }
+
+  &__answer_opened {
+    margin-top: 30px;
+    opacity: 1;
+  }
+
+  &__answer_text-hidden {
+    opacity: 0;
+    transition: opacity 0.15s linear;
+  }
+
+  &__answer_text-active {
+    opacity: 1;
+  }
+}
+
+.button-round__questions-page {
+  position: absolute;
+  right: -150px;
+  bottom: calc(50% - 49px);
+}
+
+.button-round__questions-page:hover ~ .card-question__title-wrap > .card-question__title {
+  color: $blue;
+}
+
+@include atDesktop1024 {
+  .card-question {
+    padding: 30px 15px 15px;
+
+    &__answer_opened {
+      margin-top: 10px;
+      margin-bottom: 15px;
+    }
+
+    &__tags {
+      min-height: 32px;
+      margin-right: 58px;
+
+      &_questions-page {
+        min-height: 47px;
+      }
+    }
+  }
+
+  .button-round__questions-page {
+    right: 0;
+    bottom: 0;
+    background-size: 12px;
+    width: 50px;
+    height: 50px;
+  }
+}

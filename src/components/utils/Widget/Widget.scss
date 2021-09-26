@@ -1,0 +1,67 @@
+@import './styles/utils.scss';
+
+.widget {
+  position: relative;
+  height: 627px;
+
+  &__iframe {
+    width: 420px;
+    height: inherit;
+    border: 0;
+    overflow: hidden;
+    border-radius: 30px;
+  }
+
+  &__stub {
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: fit-content;
+    margin: 0 auto;
+    padding: 0 10px;
+    font-family: $protoGrotesk;
+    font-size: 24px;
+    line-height: 1.2;
+    text-align: center;
+    z-index: -1;
+  }
+}
+
+@media (max-width: 1440px) {
+  .widget {
+    &__iframe {
+      width: 404px;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .widget {
+    height: 545px;
+
+    &__stub {
+      font-size: 19px;
+    }
+  }
+}
+
+@media (max-width: 860px) {
+  .widget {
+    height: 427.5px;
+
+    &__iframe {
+      margin-right: 0;
+      align-self: center;
+    }
+  }
+}
+
+@media (max-width: 420px) {
+  .widget {
+    &__iframe {
+      width: 100%;
+    }
+  }
+}

@@ -1,0 +1,36 @@
+@import './styles/utils.scss';
+
+.rights-card {
+  &__link {
+    max-width: 420px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-self: auto;
+    text-align: center;
+    flex: 1;
+    text-decoration: none;
+
+    &::before {
+      content: '';
+      padding-bottom: 100%;
+    }
+  }
+
+  &__block {
+    margin-top: 10px;
+  }
+
+  &__rubric {
+    margin-top: 5px;
+    margin-right: 5px;
+    align-self: center;
+
+    &:last-of-type {
+      margin-right: 0px;
+    }
+  }
+}

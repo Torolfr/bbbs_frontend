@@ -1,0 +1,79 @@
+@import './styles/utils.scss';
+
+.header {
+  position: fixed;
+	width: 100%;
+  box-sizing: border-box;
+  top: 0;
+  left: 0;
+  padding: 47px 75px 15px;
+  background-color: rgba($background, 1);
+  transition: 0.3s ease-out;
+  z-index: 10;
+
+  &_transparent {
+    background-color: rgba($background, 0);
+  }
+
+  @include atDesktop1279 {
+    &_displayed {
+      background-color: $white;
+      border-radius: 0 0 30px 30px;
+    }
+  }
+}
+
+.header__container {
+  max-width: 1770px;
+  margin: 0 auto;
+}
+
+.header__user-info {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  margin-top: 33px;
+}
+
+@include atDesktop1440 {
+  .header {
+    padding-left: 135px;
+    padding-right: 135px;
+  }
+}
+
+@include atDesktop1279 {
+  .header__user-info {
+    display: none;
+  }
+}
+
+@include atDesktop1024 {
+  .header {
+    padding: 44px 127px 15px;
+  }
+}
+
+@include atTabletL {
+  .header {
+    padding-top: 14px;
+  }
+}
+
+@include atTablet {
+  .header {
+    padding-left: 60px;
+    padding-right: 60px;
+  }
+}
+
+@include atMobile {
+  .header {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}
+
+.header__on-scroll-up {
+  transform: translateY(-100%);
+}

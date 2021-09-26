@@ -1,0 +1,79 @@
+@import './styles/utils.scss';
+
+.card-annotation {
+  padding: 33px;
+  padding-right: 10px;
+  overflow: hidden;
+  height: 153px;
+  box-sizing: content-box;
+
+  &_main {
+    padding-top: 47px;
+    padding-bottom: 30px;
+    height: 100%;
+    box-sizing: border-box;
+
+    &_center {
+      display: flex;
+      justify-content: flex-end;
+
+      > div {
+        max-height: 428px;
+      }
+
+      > div > div > .card-annotation__desc {
+        margin-top: 0;
+      }
+    }
+  }
+
+  &__caption {
+    box-sizing: border-box;
+    padding-right: 10px;
+    padding-bottom: 10px;
+  }
+
+  &__desc {
+    box-sizing: border-box;
+    padding-right: 18px;
+    margin-top: 95px;
+
+    &_center {
+      margin-top: 0;
+    }
+  }
+}
+
+@include atDesktop1199 {
+  .card-annotation {
+    &_main {
+      padding: 30px 15px;
+
+      & .card-annotation__desc {
+        margin-top: 0;
+      }
+    }
+  }
+}
+
+@include atDesktop1024 {
+  .card-annotation {
+    box-sizing: content-box;
+    height: 128px;
+    padding-left: 15px;
+    padding-right: 7px;
+    padding-bottom: 30px;
+
+    &_main {
+      height: 128px;
+    }
+
+    &__caption {
+      padding-bottom: 5px;
+    }
+
+    &__desc {
+      padding-right: 15px;
+    }
+  }
+}
