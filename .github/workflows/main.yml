@@ -17,7 +17,7 @@ jobs:
           host: ${{  secrets.HOST }}
           username: ${{ secrets.USER }}
           password: ${{ secrets.PASSWORD }}
-          source: "/build/*"
+          source: "build/*"
           target: "~/bbbs_frontend"
           overwrite: true
 
