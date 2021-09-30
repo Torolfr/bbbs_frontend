@@ -2,10 +2,11 @@ import { Link } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import mainPageTexts from './locales/RU';
 import { CurrentUserContext, PopupsContext } from '../../contexts';
-import { useActivityTypes, useEventBooking } from '../../hooks';
 import { QUESTIONS_URL, STORIES_URL } from '../../config/routes';
 import { staticImageUrl } from '../../config/config';
 import { ERROR_MESSAGES, localStAfishaEvent } from '../../config/constants';
+import { useActivityTypes, useEventBooking, usePageWidth } from '../../hooks';
+import { getLocalStorageData } from '../../hooks/useLocalStorage';
 import { randomizeArray } from '../../utils/utils';
 import getMainPageData from '../../api/main-page';
 import {
@@ -24,11 +25,19 @@ import {
   Widget,
 } from './index';
 import './MainPage.scss';
-import { getLocalStorageData } from '../../hooks/useLocalStorage';
 
 // количество отображаемых карточек с фильмами и вопросами
 const MOVIES_COUNT = 4;
 const QUESTIONS_COUNT = 3;
+
+const PAGE_SIZE_PAGINATE = {
+  small: 1,
+  default: 4,
+};
+
+const MAX_SCREEN_WIDTH = {
+  small: 767,
+};
 
 const { headTitle, headDescription, CardAnimatedPlugText } = mainPageTexts;
 
@@ -36,13 +45,15 @@ function MainPage() {
   const { currentUser } = useContext(CurrentUserContext);
   const { openPopupAboutEvent } = useContext(PopupsContext);
 
-  const [mainPageData, setMainPageData] = useState(null);
+  const [mainPageData, setMainPageData] = useState({});
   const [randomQuestions, setRandomQuestions] = useState([]);
   const [randomMovies, setRandomMovies] = useState([]);
   const [isCityChanging, setIsCityChanging] = useState(false);
   const [isPageError, setIsPageError] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
+
   const { activityTypesSimplified } = useActivityTypes();
+  const { isSmallQuery } = usePageWidth(MAX_SCREEN_WIDTH, PAGE_SIZE_PAGINATE);
 
   // запись/отписка на мероприятия
   const { handleEventBooking, selectedEvent, isWaitingResponse } =
@@ -71,17 +82,23 @@ function MainPage() {
 
   // рандомизируем вопросы и фильмы 1 раз при загрузке страницы
   useEffect(() => {
-    if (mainPageData && isPageLoading) {
-      setRandomQuestions(
-        randomizeArray(mainPageData.questions, QUESTIONS_COUNT)
-      );
-      setRandomMovies(randomizeArray(mainPageData.movies, MOVIES_COUNT));
+    if ((mainPageData.questions || mainPageData.movies) && isPageLoading) {
+      if (mainPageData.questions) {
+        setRandomQuestions(
+          randomizeArray(mainPageData.questions, QUESTIONS_COUNT)
+        );
+      }
+
+      if (mainPageData.movies) {
+        setRandomMovies(randomizeArray(mainPageData.movies, MOVIES_COUNT));
+      }
+
       setIsPageLoading(false);
     }
   }, [mainPageData]);
 
-  // глобальный лоадер (без футера)
-  if (!mainPageData && !isPageError) {
+  // глобальный лоадер
+  if (isPageLoading) {
     return <Loader isCentered />;
   }
 
@@ -90,6 +107,7 @@ function MainPage() {
       {isPageError ? (
         <AnimatedPageContainer
           titleText={ERROR_MESSAGES.generalErrorMessage.title}
+          isNoButton
         />
       ) : (
         renderPageContent()
@@ -99,11 +117,11 @@ function MainPage() {
 
   function renderEventsBlock() {
     // карточка ивента
-    if (currentUser && mainPageData?.event) {
+    if (currentUser && mainPageData.event) {
       return (
         <CardCalendar
           sectionClass="scale-in"
-          key={mainPageData.event?.id}
+          key={`event-${mainPageData.event.id}`}
           cardData={mainPageData.event}
           onEventSignUpClick={handleEventBooking}
           onEventDescriptionClick={openPopupAboutEvent}
@@ -122,20 +140,20 @@ function MainPage() {
   }
 
   function renderHistoryBlock() {
-    if (mainPageData?.history) {
+    if (mainPageData.history) {
       return (
         <Card
           sectionClass="lead__media scale-in"
-          key={mainPageData?.history?.id}
+          key={`story-${mainPageData.history.id}`}
         >
           <Link
-            to={`${STORIES_URL}/${mainPageData?.history?.id}`}
+            to={`${STORIES_URL}/${mainPageData.history.id}`}
             className="lead__link"
           >
-            {mainPageData?.history?.title}
+            {mainPageData.history.title}
           </Link>
           <img
-            src={`${staticImageUrl}/${mainPageData?.history?.image}`}
+            src={`${staticImageUrl}/${mainPageData.history.image}`}
             alt={mainPageData.history.title}
             className="lead__media-img"
           />
@@ -155,8 +173,8 @@ function MainPage() {
     return (
       <section className="place main-section page__section">
         <CardPlace
-          key={mainPageData?.place?.id}
-          data={mainPageData?.place}
+          key={`place-${mainPageData.place.id}`}
+          data={mainPageData.place}
           sectionClass="card-container_type_main-article scale-in"
           activityTypesSimplified={activityTypesSimplified}
           isBig
@@ -170,10 +188,10 @@ function MainPage() {
     return (
       <section className="articles main-section page__section scale-in">
         <CardArticleBig
-          key={article?.id}
-          title={article?.title}
+          key={`article-${article.id}`}
+          title={article.title}
           color={color}
-          articleUrl={article?.articleUrl}
+          articleUrl={article.articleUrl}
         />
       </section>
     );
@@ -190,8 +208,9 @@ function MainPage() {
         {randomMovies.map((movie) => (
           <CardFilm
             data={movie}
-            key={movie.id}
+            key={`movie-${movie.id}`}
             sectionClass={additionalMoviesClasses}
+            isMobile={isSmallQuery}
           />
         ))}
       </section>
@@ -202,8 +221,9 @@ function MainPage() {
     return (
       <section className="video main-section page__section scale-in">
         <CardVideoMain
-          key={mainPageData?.video?.id}
-          data={mainPageData?.video}
+          key={`video-${mainPageData.video.id}`}
+          data={mainPageData.video}
+          isMobile={isSmallQuery}
         />
       </section>
     );
@@ -214,7 +234,7 @@ function MainPage() {
       <div className="main-questions__container">
         {randomQuestions.map((item) => (
           <CardQuestion
-            key={item?.id}
+            key={`question-${item.id}`}
             data={item}
             href={{
               pathname: QUESTIONS_URL,
@@ -245,21 +265,21 @@ function MainPage() {
               title="Facebook"
               link="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FBigBrothers.BigSisters.Russia&tabs=timeline&width=420&height=627&small_header=false&adapt_container_width=false&hide_cover=false&show_facepile=true&appId"
             />
-            {randomQuestions?.length > 0 && renderQuestionBlock()}
+            {randomQuestions.length > 0 && renderQuestionBlock()}
           </div>
         </section>
 
-        {mainPageData?.place && renderPlaceSection()}
+        {mainPageData.place && renderPlaceSection()}
 
-        {mainPageData?.articles?.length > 0 &&
-          renderArticleSection(mainPageData?.articles[0], 'blue')}
+        {mainPageData.articles?.length > 0 &&
+          renderArticleSection(mainPageData.articles[0], 'blue')}
 
-        {randomMovies?.length > 0 && renderMoviesSection()}
+        {randomMovies.length > 0 && renderMoviesSection()}
 
-        {mainPageData?.video && renderVideoSection()}
+        {mainPageData.video && renderVideoSection()}
 
-        {mainPageData?.articles?.length > 1 &&
-          renderArticleSection(mainPageData?.articles[1], 'green')}
+        {mainPageData.articles?.length > 1 &&
+          renderArticleSection(mainPageData.articles[1], 'green')}
       </>
     );
   }

@@ -1,12 +1,4 @@
-import { useEffect, useState } from 'react';
 import readAndWatchPageTexts from './locales/read-and-watch-page-RU';
-import {
-  BasePage,
-  CardArticle,
-  CardBook,
-  CardCatalog,
-  CardFilm,
-} from './index';
 import {
   ARTICLES_URL,
   BOOKS_URL,
@@ -15,18 +7,26 @@ import {
   VIDEO_URL,
 } from '../../config/routes';
 import {
-  ELEMS_PER_SLIDE,
+  MAX_SCREEN_WIDTH,
+  PAGE_SIZE_PAGINATE,
   RAW_DELAY_SLIDER_TRANSITION,
-  RAW_SLIDER_BREAKPOINTS,
   RAW_SLIDER_PADDINGS,
 } from './constants';
-import ReadAndWatchSection from '../../components/ReadAndWatchSection/ReadAndWatchSection';
+import { usePageWidth } from '../../hooks';
 // АПИ
 import { getCatalogPageData } from '../../api/catalog-page';
 import { getVideoPageData } from '../../api/video-page';
 import { getArticlesPageData } from '../../api/articles-page';
 import { getMoviesPageData } from '../../api/movies-page';
 import { getBooksPageData } from '../../api/books-page';
+import {
+  BasePage,
+  CardArticle,
+  CardBook,
+  CardCatalog,
+  CardFilm,
+  ReadAndWatchSection,
+} from './index';
 import './ReadAndWatch.scss';
 
 // константы страницы
@@ -34,44 +34,13 @@ const { headTitle, headDescription, pageTitles, paragraphNoContent } =
   readAndWatchPageTexts;
 const { catalogTitle, articlesTitle, moviesTitle, videosTitle, booksTitle } =
   pageTitles;
-const { S, M, L } = RAW_SLIDER_BREAKPOINTS;
-const { one, two, three, four } = ELEMS_PER_SLIDE;
 
 function ReadAndWatch() {
   // определяет сколько объектов показывать в ряду
-  const [pageSize, setPageSize] = useState(null);
-
-  useEffect(() => {
-    // 1 элемент в ряду (до 700px)
-    const querySizeS = window.matchMedia(`(max-width: ${S}px)`);
-    // 2 элемента в ряду (до 1120px)
-    const querySizeM = window.matchMedia(`(max-width: ${M}px)`);
-    // 3 элемента в ряду (до 1440px)
-    const querySizeL = window.matchMedia(`(max-width: ${L}px)`);
-    // больше 1440px будет 4 элемента в ряду
-
-    const listener = () => {
-      if (querySizeS.matches) {
-        setPageSize(one);
-      } else if (querySizeM.matches) {
-        setPageSize(two);
-      } else if (querySizeL.matches) {
-        setPageSize(three);
-      } else {
-        setPageSize(four);
-      }
-    };
-    listener();
-
-    querySizeS.addEventListener('change', listener);
-    querySizeM.addEventListener('change', listener);
-    querySizeL.addEventListener('change', listener);
-    return () => {
-      querySizeS.removeEventListener('change', listener);
-      querySizeM.removeEventListener('change', listener);
-      querySizeL.removeEventListener('change', listener);
-    };
-  }, []);
+  const { pageSize, isSmallQuery } = usePageWidth(
+    MAX_SCREEN_WIDTH,
+    PAGE_SIZE_PAGINATE
+  );
 
   return (
     <BasePage headTitle={headTitle} headDescription={headDescription}>
@@ -85,7 +54,7 @@ function ReadAndWatch() {
     return (
       <>
         <ReadAndWatchSection
-          breakpoints={RAW_SLIDER_BREAKPOINTS}
+          breakpoints={MAX_SCREEN_WIDTH}
           elemPaddings={RAW_SLIDER_PADDINGS}
           transitionDelay={RAW_DELAY_SLIDER_TRANSITION}
           paragraphNoContentText={paragraphNoContent}
@@ -94,10 +63,10 @@ function ReadAndWatch() {
           CardTemplateComponent={CardCatalog}
           path={CATALOG_URL}
           sectionTitle={catalogTitle}
-          sectionClass="readwatch-page__slider-container_el_catalog"
+          sectionClass="readwatch-page__slider-element"
         />
         <ReadAndWatchSection
-          breakpoints={RAW_SLIDER_BREAKPOINTS}
+          breakpoints={MAX_SCREEN_WIDTH}
           elemPaddings={RAW_SLIDER_PADDINGS}
           transitionDelay={RAW_DELAY_SLIDER_TRANSITION}
           paragraphNoContentText={paragraphNoContent}
@@ -106,11 +75,12 @@ function ReadAndWatch() {
           CardTemplateComponent={CardFilm}
           path={VIDEO_URL}
           sectionTitle={videosTitle}
-          sectionClass="readwatch-page__slider-container_el_video"
+          sectionClass="readwatch-page__slider-element"
           isVideo
+          isSmallQuery={isSmallQuery}
         />
         <ReadAndWatchSection
-          breakpoints={RAW_SLIDER_BREAKPOINTS}
+          breakpoints={MAX_SCREEN_WIDTH}
           elemPaddings={RAW_SLIDER_PADDINGS}
           transitionDelay={RAW_DELAY_SLIDER_TRANSITION}
           paragraphNoContentText={paragraphNoContent}
@@ -119,10 +89,10 @@ function ReadAndWatch() {
           CardTemplateComponent={CardArticle}
           path={ARTICLES_URL}
           sectionTitle={articlesTitle}
-          sectionClass="readwatch-page__slider-container_el_articles"
+          sectionClass="readwatch-page__slider-element"
         />
         <ReadAndWatchSection
-          breakpoints={RAW_SLIDER_BREAKPOINTS}
+          breakpoints={MAX_SCREEN_WIDTH}
           elemPaddings={RAW_SLIDER_PADDINGS}
           transitionDelay={RAW_DELAY_SLIDER_TRANSITION}
           paragraphNoContentText={paragraphNoContent}
@@ -131,10 +101,11 @@ function ReadAndWatch() {
           CardTemplateComponent={CardFilm}
           path={MOVIES_URL}
           sectionTitle={moviesTitle}
-          sectionClass="readwatch-page__slider-container_el_movies"
+          sectionClass="readwatch-page__slider-element"
+          isSmallQuery={isSmallQuery}
         />
         <ReadAndWatchSection
-          breakpoints={RAW_SLIDER_BREAKPOINTS}
+          breakpoints={MAX_SCREEN_WIDTH}
           elemPaddings={RAW_SLIDER_PADDINGS}
           transitionDelay={RAW_DELAY_SLIDER_TRANSITION}
           paragraphNoContentText={paragraphNoContent}
@@ -143,7 +114,7 @@ function ReadAndWatch() {
           CardTemplateComponent={CardBook}
           path={BOOKS_URL}
           sectionTitle={booksTitle}
-          sectionClass="readwatch-page__slider-container_el_books"
+          sectionClass="readwatch-page__slider-element"
         />
       </>
     );

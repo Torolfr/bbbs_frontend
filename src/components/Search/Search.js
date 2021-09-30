@@ -6,10 +6,25 @@ import { Loader, SearchButton } from '../utils';
 import { useDebounce, useFormWithValidation } from '../../hooks';
 import { getLocalStorageData } from '../../hooks/useLocalStorage';
 import search from '../../api/search';
-import { CATALOG_URL, RIGHTS_URL, STORIES_URL } from '../../config/routes';
-import { CurrentUserContext } from '../../contexts';
-import { DELAY_DEBOUNCE, localStUserCity } from '../../config/constants';
+import {
+  AFISHA_URL,
+  MOVIES_URL,
+  QUESTIONS_URL,
+  VIDEO_URL,
+} from '../../config/routes';
+import {
+  CurrentUserContext,
+  ErrorsContext,
+  PopupsContext,
+} from '../../contexts';
+import {
+  DELAY_DEBOUNCE,
+  ERROR_MESSAGES,
+  localStUserCity,
+} from '../../config/constants';
 import './Search.scss';
+
+const SearchMaxLength = 200;
 
 function Search({
   isOpenSearch,
@@ -18,6 +33,8 @@ function Search({
   setIsMobileMenuOpen,
 }) {
   const { currentUser } = useContext(CurrentUserContext);
+  const { setError } = useContext(ErrorsContext);
+  const { openPopupError } = useContext(PopupsContext);
 
   // приоритет города у авторизованного, затем у выбранного на странице Куда пойти
   const currentAnonymousCity = getLocalStorageData(localStUserCity);
@@ -31,10 +48,13 @@ function Search({
   const inputRef = useRef(null);
 
   const getPathName = (url, id) => {
-    if (`/${url}` === RIGHTS_URL) return `/${url}/${id}`;
-    if (`/${url}` === CATALOG_URL) return `/${url}/${id}`;
-    if (`/${url}` === STORIES_URL) return `/${url}/${id}`;
-    return `/${url}`;
+    // переходы на страницы с попапами либо вопроса
+    if (`/${url}` === AFISHA_URL) return `/${url}`;
+    if (`/${url}` === MOVIES_URL) return `/${url}`;
+    if (`/${url}` === VIDEO_URL) return `/${url}`;
+    if (`/${url}` === QUESTIONS_URL) return `/${url}`;
+    // остальные страницы имеют динамические роуты
+    return `/${url}/${id}`;
   };
 
   const animateListItem = (idx) => ({
@@ -59,14 +79,20 @@ function Search({
   };
 
   const handleSearchRequest = async () => {
-    const searchParams = userCity
-      ? { text: values.search, city: userCity }
-      : { text: values.search };
-    const currentRequest = search(searchParams);
-    const { count, results } = await currentRequest;
-    setSearchResults(results);
-    setIsLoadingSearch(false);
-    return count === 0 ? setIsVoidSearch(true) : setIsVoidSearch(false);
+    try {
+      const searchParams = userCity
+        ? { text: values.search, city: userCity }
+        : { text: values.search };
+      const currentRequest = search(searchParams);
+      const { count, results } = await currentRequest;
+      setSearchResults(results);
+      setIsLoadingSearch(false);
+      return count === 0 ? setIsVoidSearch(true) : setIsVoidSearch(false);
+    } catch {
+      setIsLoadingSearch(false);
+      setError(ERROR_MESSAGES.generalErrorMessage);
+      return openPopupError();
+    }
   };
 
   const handleDebouncedRequest = useDebounce(
@@ -114,6 +140,7 @@ function Search({
               type="text"
               name="search"
               placeholder=""
+              maxLength={SearchMaxLength}
               className="search__input paragraph"
               autoComplete="off"
               onChange={handleChange}

@@ -18,7 +18,6 @@ import {
 } from '../config/constants';
 
 const useAuth = (setCurrentUser) => {
-  const { generalErrorMessage } = ERROR_MESSAGES;
   const { unauthorized, badRequest } = ERROR_CODES;
 
   const [isCheckingToken, setIsCheckingToken] = useState(true);
@@ -36,7 +35,7 @@ const useAuth = (setCurrentUser) => {
       errors.setError(err?.data);
     else
       errors.setError({
-        message: generalErrorMessage.title,
+        message: ERROR_MESSAGES.generalErrorMessage.title,
       });
   };
 
@@ -62,7 +61,7 @@ const useAuth = (setCurrentUser) => {
             .catch((err) => handleError(err))
             .finally(() => setIsWaitingResponse(false));
         } else {
-          throw new Error(generalErrorMessage.title);
+          throw new Error(ERROR_MESSAGES.generalErrorMessage.title);
         }
       })
       .catch((err) => handleError(err)) // авторизация (работа с сервером) закончилась ошибкой
@@ -70,9 +69,11 @@ const useAuth = (setCurrentUser) => {
   };
 
   const handleTokenError = () => {
+    AuthApi.clearAuth();
     removeLocalStorageData(jwt);
     removeLocalStorageData(jwtRefresh);
     setIsCheckingToken(false);
+    setCurrentUser(null);
   };
 
   const checkRefreshToken = (refresh) => {
@@ -82,7 +83,7 @@ const useAuth = (setCurrentUser) => {
         setLocalStorageData(jwt, access);
         getUserData()
           .then((userData) => setCurrentUser(userData))
-          .catch((err) => handleError(err))
+          .catch(() => handleTokenError())
           .finally(() => setIsCheckingToken(false));
       })
       .catch(() => handleTokenError());
@@ -108,6 +109,8 @@ const useAuth = (setCurrentUser) => {
             handleTokenError();
           }
         });
+    } else if (refreshToken) {
+      checkRefreshToken(refreshToken);
     } else {
       handleTokenError();
     }
