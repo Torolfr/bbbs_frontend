@@ -20,6 +20,7 @@ function ReadAndWatchSection({
   getDataFromApi,
   CardTemplateComponent,
   isVideo,
+  isSmallQuery,
   path,
   sectionTitle,
   breakpoints,
@@ -28,7 +29,7 @@ function ReadAndWatchSection({
   paragraphNoContentText,
   sectionClass,
 }) {
-  const { S, M, L, XL } = breakpoints;
+  const { small, medium, big, large } = breakpoints;
   const ref = useRef();
 
   // индекс страницы
@@ -41,10 +42,10 @@ function ReadAndWatchSection({
   const [isSectionError, setIsSectionError] = useState(false);
 
   const breakPoints = [
-    { width: S, itemsToShow: pageSize, itemsToScroll: pageSize },
-    { width: M, itemsToShow: pageSize, itemsToScroll: pageSize },
-    { width: L, itemsToShow: pageSize, itemsToScroll: pageSize },
-    { width: XL, itemsToShow: pageSize, itemsToScroll: pageSize },
+    { width: small, itemsToShow: pageSize, itemsToScroll: pageSize },
+    { width: medium, itemsToShow: pageSize, itemsToScroll: pageSize },
+    { width: big, itemsToShow: pageSize, itemsToScroll: pageSize },
+    { width: large, itemsToShow: pageSize, itemsToScroll: pageSize },
   ];
 
   function addNewData() {
@@ -128,6 +129,7 @@ function ReadAndWatchSection({
           color={COLORS[(i + 1) % COLORS.length]}
           // для секции с Видео
           isVideo={isVideo}
+          isMobile={isSmallQuery}
           {...item}
         />
       ));
@@ -196,11 +198,13 @@ ReadAndWatchSection.propTypes = {
   paragraphNoContentText: PropTypes.string.isRequired,
   sectionClass: PropTypes.string,
   isVideo: PropTypes.bool,
+  isSmallQuery: PropTypes.bool,
 };
 
 ReadAndWatchSection.defaultProps = {
   sectionClass: '',
   isVideo: false,
+  isSmallQuery: false,
 };
 
 export default ReadAndWatchSection;

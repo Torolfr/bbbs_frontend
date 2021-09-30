@@ -1,217 +1,154 @@
-import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import articlesPageTexts from './locales/RU';
 import { COLORS, ERROR_MESSAGES } from '../../config/constants';
+import { ARTICLES_URL } from '../../config/routes';
+import {
+  useFiltrationWithMainCard,
+  usePageWidth,
+  useSingleCardAtDynamicRoute,
+} from '../../hooks';
+import { getArticleById, getArticlesPageData } from '../../api/articles-page';
 import {
   AnimatedPageContainer,
   BasePage,
+  Card,
   CardArticle,
   Loader,
+  NextArticleLink,
   Paginate,
-  PopupArticle,
   TitleH1,
 } from './index';
-import { getArticle, getArticlesPageData } from '../../api/articles-page';
 import './Articles.scss';
 
 const PAGE_SIZE_PAGINATE = {
   small: 8,
-  big: 12,
+  default: 12,
 };
 
-const maxScreenWidth = {
+const MAX_SCREEN_WIDTH = {
   small: 1024,
 };
 
 const { headTitle, headDescription, title, textStubNoData } = articlesPageTexts;
 
 function Articles() {
-  const [pageSize, setPageSize] = useState(null);
-  const [pageCount, setPageCount] = useState(0);
-  const [pageNumber, setPageNumber] = useState(0);
+  const { articleId } = useParams();
 
-  const [articlesPageData, setArticlesPageData] = useState(null);
-  const [mainArticle, setMainCard] = useState(null);
-  const [isLoadingPage, setIsLoadingPage] = useState(true);
-  const [isLoadingPaginate, setIsLoadingPaginate] = useState(false);
+  // определяет размер страницы при ресайзе
+  const { pageSize } = usePageWidth(MAX_SCREEN_WIDTH, PAGE_SIZE_PAGINATE);
+  // стейт ошибки
   const [isPageError, setIsPageError] = useState(false);
-  const [isArticlePopupOpen, setIsArticlePopupOpen] = useState(false);
 
-  const { state } = useLocation();
-  const searchArticleId = state?.id;
-  const [searchedArticle, setSearchedArticle] = useState({});
+  // одиночная карточка при переходе по динамическому маршруту
+  const { singleCard, isSingleCardShown } = useSingleCardAtDynamicRoute({
+    apiCallback: getArticleById,
+    dynamicParam: articleId,
+    setIsPageError,
+  });
 
-  const getPageData = () => {
-    const offset = pageSize * pageNumber;
-    const fixedPageSize =
-      pageNumber === 0 && mainArticle ? pageSize + 1 : pageSize;
-    const fixedOffset = pageNumber > 0 && mainArticle ? offset + 1 : offset;
-
-    getArticlesPageData({ limit: fixedPageSize, offset: fixedOffset })
-      .then(({ results }) => {
-        if (pageNumber === 0 && mainArticle) {
-          setArticlesPageData(() =>
-            results.filter((item) => !item?.pinnedFullSize)
-          );
-        } else setArticlesPageData(results);
-      })
-      .catch(() => setIsPageError(true))
-      .finally(() => {
-        setIsLoadingPaginate(false);
-      });
+  // фильтрация и пагинация
+  const filtersAndPaginationSettings = {
+    apiGetDataCallback: getArticlesPageData,
+    pageSize,
+    setIsPageError,
+    dontStartWhileTrue: !!articleId, // скрипты выполнятся, только если нет запроса по id
   };
 
-  const openPopupArticle = () => {
-    setIsArticlePopupOpen(true);
-  };
+  const {
+    dataToRender,
+    mainCard,
+    isMainCard,
+    isMainCardShown,
+    isPageLoading,
+    isPaginationUsed,
+    totalPages,
+    pageIndex,
+    changePageIndex,
+  } = useFiltrationWithMainCard(filtersAndPaginationSettings);
 
-  const closePopupArticle = () => {
-    setIsArticlePopupOpen(false);
-  };
-
-  // Открытие попапа при переходе из поиска
-  useEffect(() => {
-    if (state) {
-      getArticle(searchArticleId)
-        .then((article) => {
-          setSearchedArticle(article);
-          openPopupArticle();
-        })
-        .catch(() => setIsPageError(true));
-    }
-  }, [state]);
-
-  // пагинация
-  useEffect(() => {
-    if (!isLoadingPage) {
-      setIsLoadingPaginate(true);
-      getPageData();
-    }
-  }, [pageNumber]);
-
-  useEffect(() => {
-    if (pageSize) {
-      getArticlesPageData({ limit: pageSize + 1 })
-        .then(({ results, count }) => {
-          const articlesData = results;
-          const mainCard = articlesData.find((item) => item?.pinnedFullSize);
-          setMainCard(mainCard);
-          if (mainCard) {
-            setArticlesPageData(() =>
-              articlesData.filter((item) => !item?.pinnedFullSize)
-            );
-            setPageCount(Math.ceil((count - 1) / pageSize));
-          } else {
-            articlesData.pop();
-            setArticlesPageData(articlesData);
-            setPageCount(Math.ceil(count / pageSize));
-          }
-        })
-        .catch(() => {
-          setIsPageError(true);
-        })
-        .finally(() => {
-          setIsLoadingPage(false);
-        });
-    }
-  }, [pageSize]);
-
-  useEffect(() => {
-    const smallQuery = window.matchMedia(
-      `(max-width: ${maxScreenWidth.small}px)`
-    );
-
-    const listener = () => {
-      if (smallQuery.matches) {
-        setPageSize(PAGE_SIZE_PAGINATE.small);
-      } else {
-        setPageSize(PAGE_SIZE_PAGINATE.big);
-      }
-    };
-    listener();
-
-    smallQuery.addEventListener('change', listener);
-
-    return () => {
-      smallQuery.removeEventListener('change', listener);
-    };
-  }, []);
-
-  if (isLoadingPage) {
+  // обычная загрузка или есть переход по id, но статья ещё не загружена
+  if (isPageLoading || (articleId && !isSingleCardShown)) {
     return <Loader isCentered />;
   }
 
   return (
     <>
       <BasePage headTitle={headTitle} headDescription={headDescription}>
-        {!articlesPageData && !isLoadingPage
-          ? renderAnimatedContainer()
-          : renderPageContent()}
+        {renderPageContent()}
       </BasePage>
-      <PopupArticle
-        isOpen={isArticlePopupOpen}
-        onClose={closePopupArticle}
-        article={searchedArticle}
-      />
     </>
   );
 
   function renderPageContent() {
-    if (isPageError) {
-      return (
-        <AnimatedPageContainer
-          titleText={ERROR_MESSAGES.generalErrorMessage.title}
-        />
-      );
+    // ошибка или (нет данных и при этом это не динамический роут)
+    if (isPageError || (!dataToRender.length && !isMainCard && !articleId)) {
+      return renderAnimatedContainer();
     }
 
     return (
       <section className="articles page__section">
         <TitleH1 title={title} sectionClass="fade-in" />
 
-        {isLoadingPaginate ? <Loader isPaginate /> : renderCards()}
-
-        {renderPagination()}
+        {renderCardsContainer()}
       </section>
     );
   }
 
+  // заглушка
   function renderAnimatedContainer() {
-    if (isPageError) {
-      return (
-        <AnimatedPageContainer
-          titleText={ERROR_MESSAGES.generalErrorMessage.title}
-        />
-      );
-    }
-    return <AnimatedPageContainer titleText={textStubNoData} />;
+    return (
+      <AnimatedPageContainer
+        titleText={
+          isPageError
+            ? ERROR_MESSAGES.generalErrorMessage.title
+            : textStubNoData
+        }
+      />
+    );
   }
 
-  function renderPagination() {
-    if (pageCount > 1) {
+  function renderCardsContainer() {
+    if (isSingleCardShown) {
       return (
-        <Paginate
-          sectionClass="cards-section__pagination"
-          pageCount={pageCount}
-          value={pageNumber}
-          onChange={setPageNumber}
-        />
+        <div className="articles__single-card-container scale-in">
+          <CardArticle data={singleCard} isMain />
+
+          <Card sectionClass="articles__single-card-paragraph">
+            <p className="paragraph">{singleCard.annotation}</p>
+          </Card>
+
+          <NextArticleLink
+            text={`Все ${title.toLowerCase()}`}
+            href={ARTICLES_URL}
+          />
+        </div>
       );
     }
-    return null;
+
+    return (
+      <>
+        {renderCards()}
+        {renderPagination()}
+      </>
+    );
   }
 
   function renderCards() {
+    if (isPaginationUsed) {
+      return <Loader isPaginate />;
+    }
+
     return (
       <>
-        {mainArticle && !pageNumber && (
+        {isMainCardShown && (
           <section className="articles__main scale-in">
-            <CardArticle data={mainArticle} isMain />
+            <CardArticle data={mainCard} isMain />
           </section>
         )}
 
         <section className="articles__cards-grid">
-          {articlesPageData.map((item, i) => (
+          {dataToRender.map((item, i) => (
             <CardArticle
               key={item?.id}
               color={COLORS[(i + 1) % COLORS.length]}
@@ -222,6 +159,20 @@ function Articles() {
         </section>
       </>
     );
+  }
+
+  function renderPagination() {
+    if (totalPages > 1) {
+      return (
+        <Paginate
+          sectionClass="cards-section__pagination"
+          pageCount={totalPages}
+          value={pageIndex}
+          onChange={changePageIndex}
+        />
+      );
+    }
+    return null;
   }
 }
 
