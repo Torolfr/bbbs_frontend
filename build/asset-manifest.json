@@ -2,9 +2,9 @@
   "files": {
     "static/js/0.6f4eff63.chunk.js": "/static/js/0.6f4eff63.chunk.js",
     "static/js/1.83264d88.chunk.js": "/static/js/1.83264d88.chunk.js",
-    "main.css": "/static/css/main.273b1947.chunk.css",
-    "main.js": "/static/js/main.f0c534a7.chunk.js",
-    "runtime-main.js": "/static/js/runtime-main.b568ac34.js",
+    "main.css": "/static/css/main.10d6da34.chunk.css",
+    "main.js": "/static/js/main.d801172a.chunk.js",
+    "runtime-main.js": "/static/js/runtime-main.fb858b08.js",
     "static/js/4.b49c2895.chunk.js": "/static/js/4.b49c2895.chunk.js",
     "static/css/5.7b7044eb.chunk.css": "/static/css/5.7b7044eb.chunk.css",
     "static/js/5.a0b39d60.chunk.js": "/static/js/5.a0b39d60.chunk.js",
@@ -13,7 +13,7 @@
     "static/css/7.0d34615a.chunk.css": "/static/css/7.0d34615a.chunk.css",
     "static/js/7.5dc25aec.chunk.js": "/static/js/7.5dc25aec.chunk.js",
     "static/css/8.b2c350d4.chunk.css": "/static/css/8.b2c350d4.chunk.css",
-    "static/js/8.0519c021.chunk.js": "/static/js/8.0519c021.chunk.js",
+    "static/js/8.aa82f64e.chunk.js": "/static/js/8.aa82f64e.chunk.js",
     "static/css/9.84c35d57.chunk.css": "/static/css/9.84c35d57.chunk.css",
     "static/js/9.0a1de376.chunk.js": "/static/js/9.0a1de376.chunk.js",
     "static/js/10.db038617.chunk.js": "/static/js/10.db038617.chunk.js",
@@ -44,9 +44,9 @@
     "static/js/1.83264d88.chunk.js.LICENSE.txt": "/static/js/1.83264d88.chunk.js.LICENSE.txt",
     "static/js/4.b49c2895.chunk.js.LICENSE.txt": "/static/js/4.b49c2895.chunk.js.LICENSE.txt",
     "static/js/6.000f3fc0.chunk.js.LICENSE.txt": "/static/js/6.000f3fc0.chunk.js.LICENSE.txt",
-    "static/js/8.0519c021.chunk.js.LICENSE.txt": "/static/js/8.0519c021.chunk.js.LICENSE.txt",
+    "static/js/8.aa82f64e.chunk.js.LICENSE.txt": "/static/js/8.aa82f64e.chunk.js.LICENSE.txt",
     "static/js/9.0a1de376.chunk.js.LICENSE.txt": "/static/js/9.0a1de376.chunk.js.LICENSE.txt",
-    "static/js/main.f0c534a7.chunk.js.LICENSE.txt": "/static/js/main.f0c534a7.chunk.js.LICENSE.txt",
+    "static/js/main.d801172a.chunk.js.LICENSE.txt": "/static/js/main.d801172a.chunk.js.LICENSE.txt",
     "static/media/index.scss": "/static/media/Proto-Grotesk-Light-Web.c43cb6b7.woff",
     "static/media/ReadAndWatchSection.scss": "/static/media/arrow-right-grey.c5d9d3b6.svg",
     "static/media/ProfileForm.scss": "/static/media/error-cross.e1acdf37.svg",
@@ -60,9 +60,9 @@
     "static/media/PlacesRecommend.scss": "/static/media/popup_close.6d949c56.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.b568ac34.js",
+    "static/js/runtime-main.fb858b08.js",
     "static/js/4.b49c2895.chunk.js",
-    "static/css/main.273b1947.chunk.css",
-    "static/js/main.f0c534a7.chunk.js"
+    "static/css/main.10d6da34.chunk.css",
+    "static/js/main.d801172a.chunk.js"
   ]
 }
